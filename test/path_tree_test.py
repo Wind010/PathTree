@@ -131,6 +131,8 @@ class TestPathTree:
         sut.add(filepath2.split('/'))
 
         # Assert
+        assert set([filepath1, filepath2]) == set(sut.get_flat_list(sut.root))
+
         assert_that(sut.root).is_equal_to({'A': {'B': {'C.txt'}, 'A': {'B': {'C.txt'}}}})
 
 
@@ -238,7 +240,90 @@ class TestPathTree:
         result = sut.contains("A/B".split('/'))
 
         # Assert
-        assert_that(result).is_false()
+        assert_that(result).is_true()
+
+
+    def test_add__set_to_dict__cached(self):
+        # Arrange
+        sut = PathTree()
+        filepath1 = 'write_year=2022/write_month=06/write_day=01/write_hour=23'
+        filepath2 = 'write_year=2022/write_month=06/write_day=01/write_hour=23/flat_partner'
+      
+        # Act
+        sut.add(filepath1.split('/'))
+        sut.add(filepath2.split('/'))
+ 
+        # Assert
+        assert_that(sut.contains(filepath1)).is_true()
+        assert_that(sut.contains(filepath2)).is_true()
+
+        paths = sut.get_flat_list()
+        assert filepath2 in paths
+
+
+    def test_add__dict_to_set__cached(self):
+        # Arrange
+        sut = PathTree()
+        filepath1 = 'write_year=2022'
+        filepath2 = 'write_year=2022/write_month=06/write_day=01/write_hour=23/flat_partner'
+      
+        # Act
+        sut.add(filepath1.split('/'))
+        sut.add(filepath2.split('/'))
+ 
+        # Assert
+        assert_that(sut.contains(filepath1)).is_true()
+        assert_that(sut.contains(filepath2)).is_true()
+
+        paths = sut.get_flat_list()
+        assert filepath2 in paths
+
+
+    def test_add__sets__cached(self):
+        # Arrange
+        sut = PathTree()
+        filepath1 = 'write_year=2022/write_month=06/write_day=01/write_hour=23/flat_partner'
+        filepath2 = 'write_year=2022/write_month=06/write_day=01/write_hour=23/soa_basket'
+      
+        # Act
+        sut.add(filepath1.split('/'))
+        sut.add(filepath2.split('/'))
+ 
+        # Assert
+        assert_that(sut.contains(filepath1)).is_true()
+        assert_that(sut.contains(filepath2)).is_true()
+
+        paths = sut.get_flat_list()
+        assert filepath1 in paths
+        assert filepath2 in paths
+
+
+    def test_add__all_conditions__cached(self):
+        # Arrange
+        sut = PathTree()
+        filepath1 = 'write_year=2022/write_month=06/write_day=01/write_hour=23'
+        filepath2 = 'write_year=2022/write_month=06/write_day=01/write_hour=23/flat_partner'
+        filepath3 = 'write_year=2022/write_month=06/write_day=01/write_hour=23/flat_partner/001'
+        filepath4 = 'write_year=2022/write_month=06/write_day=01/write_hour=23/soa_basket'
+        filepath5 = 'write_year=2022/write_month=06/write_day=01/write_hour=23/soa_basket/002'
+
+        # Act
+        sut.add(filepath1.split('/'))
+        sut.add(filepath2.split('/'))
+        sut.add(filepath3.split('/'))
+        sut.add(filepath4.split('/'))
+        sut.add(filepath5.split('/'))
+
+
+        # Assert
+        assert_that(sut.contains(filepath1)).is_true()
+        assert_that(sut.contains(filepath2)).is_true()
+        assert_that(sut.contains(filepath3)).is_true()
+        assert_that(sut.contains(filepath4)).is_true()
+
+        paths = sut.get_flat_list()
+        assert filepath3 in paths
+        assert filepath5 in paths
 
 
     def test_contains__long_path__returns__true(self):
@@ -297,7 +382,7 @@ class TestPathTree:
         filepath1 = 'write_year=2019/write_month=10/write_day=02/write_hour=23/item_alt_cat/2019100200_000_0000_000163_00001588792147.339/part-00000-tid-884024087271743393-049ce1fc-e50f-45ec-b85b-4952c7d203ae-111949-1-c000.txt'
         filepath2 = 'A/B/C.txt'
         filepath3 = "1/2.txt"
-        filepath4 = 'A/B/X.txt'        
+        filepath4 = 'A/B/X.txt'
         filepath5 = '1/3.txt'
         sut = PathTree()
 
